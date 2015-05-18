@@ -12,10 +12,12 @@ def parse()
 
 	parser = OptionParser.new do |opts|
 		# banner for help message
-		opts.banner = "Usage: name.rb [options] args ... "
+		opts.banner = "Usage: #{$0} [options] args ... "
+		opts.separator "  <description of program here>"
+		opts.separator ""
 
 		# register each option
-		opts.on("-h", "--help", "show this help message") do
+		opts.on_tail("-h", "--help", "show this help message") do
 			puts opts
 			exit
 		end
