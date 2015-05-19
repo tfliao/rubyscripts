@@ -27,6 +27,7 @@ def parse()
 			exit
 		end
 
+		# specific options
 		## switch on/off
 		opts.on("-v", "--[no-]verbose", "run verbosely") do |v|
 			options.verbose = v
