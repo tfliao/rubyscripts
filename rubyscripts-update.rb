@@ -78,8 +78,9 @@ Dir.chdir("/tmp") do
 
 		scripts.each do |s|
 			basename = File.basename(s, ".rb")
+			final_name = "#{$options.install_path}/#{basename}"
 
-			if ! File.exist?("#{$options.install_path}/#{basename}") then
+			if ! File.exist?(final_name) then
 				show_message("scripts #{basename} not exists", $options.check_only)
 				next if $options.check_only
 				update(basename)
@@ -87,9 +88,7 @@ Dir.chdir("/tmp") do
 			end
 
 			new_version = `./#{basename}.rb --version`
-			version = `#{basename} --version`
-
-			puts "#{new_version} #{version}"
+			version = `#{final_name} --version`
 
 			if new_version != version then
 				show_message("scripts #{basename} can be updated", $options.check_only)
