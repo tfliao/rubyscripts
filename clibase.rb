@@ -12,8 +12,8 @@ def parse()
 
 	parser = OptionParser.new do |opts|
 		# banner for help message
-		opts.banner = "Usage: #{$0} [options] args ... "
-		opts.separator "  <description of program here>"
+		opts.banner =  "Usage: #{$0} [options] args ... "
+		opts.separator "       <description of program here>"
 		opts.separator ""
 
 		# register each option

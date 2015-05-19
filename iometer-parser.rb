@@ -11,8 +11,8 @@ def parse()
 	options.field = 'auto'
 
 	parser = OptionParser.new do |opts|
-		opts.banner = "Usage: #{$0} [options] files ..."
-		opts.separator "     parser to parse iometer result csv files to a copy friendly format"
+		opts.banner =  "Usage: #{$0} [options] files ..."
+		opts.separator "       parser to parse iometer result csv files to a copy friendly format"
 		opts.separator ""
 
 		opts.on_tail("-h", "--help", "show help message") do

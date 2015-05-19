@@ -13,8 +13,8 @@ def parse()
 
 	parser = OptionParser.new do |opts|
 		# banner for help message
-		opts.banner = "Usage: #{$0} [options] key [basedir]"
-		opts.separator "  get files that contain key string"
+		opts.banner =  "Usage: #{$0} [options] key [basedir]"
+		opts.separator "       collect files that contain key"
 		opts.separator ""
 
 		# register each option
