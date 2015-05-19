@@ -16,14 +16,19 @@ def parse()
 		opts.separator "       <description of program here>"
 		opts.separator ""
 
-		# register each option
+		# common options
 		opts.on_tail("-h", "--help", "show this help message") do
 			puts opts
 			exit
 		end
+		opts.on_tail("--version", "show version") do
+			basename = File.basename(__FILE__, ".rb")
+			puts "#{basename} 1.0.0"
+			exit
+		end
 
 		## switch on/off
-		opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+		opts.on("-v", "--[no-]verbose", "run verbosely") do |v|
 			options.verbose = v
 		end
 		## load value

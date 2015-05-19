@@ -15,10 +15,18 @@ def parse()
 		opts.separator "       parser to parse iometer result csv files to a copy friendly format"
 		opts.separator ""
 
-		opts.on_tail("-h", "--help", "show help message") do
+		# common options
+		opts.on_tail("-h", "--help", "show this help message") do
 			puts opts
 			exit
 		end
+		opts.on_tail("--version", "show version") do
+			basename = File.basename(__FILE__, ".rb")
+			puts "#{basename} 1.0.0"
+			exit
+		end
+
+		# specific options
 		opts.on("-o=O1, ...", "--order=O1, ...", Array, "order of result") do |v|
 			options.order.concat(v)
 		end

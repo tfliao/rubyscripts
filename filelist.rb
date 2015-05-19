@@ -17,12 +17,18 @@ def parse()
 		opts.separator "       collect files that contain key"
 		opts.separator ""
 
-		# register each option
+		# common options
 		opts.on_tail("-h", "--help", "show this help message") do
 			puts opts
 			exit
 		end
+		opts.on_tail("--version", "show version") do
+			basename = File.basename(__FILE__, ".rb")
+			puts "#{basename} 1.0.0"
+			exit
+		end
 
+		# specific options
 		opts.on("-1", "--single", "show each file in single line") do |v|
 			options.single = v
 		end
