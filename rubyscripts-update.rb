@@ -24,7 +24,7 @@ def parse()
 		end
 		opts.on_tail("--version", "show version") do
 			basename = File.basename(__FILE__, ".rb")
-			puts "#{basename} 1.1.1"
+			puts "#{basename} 1.1.2"
 			exit
 		end
 
@@ -64,6 +64,7 @@ def prepare_install_path(path)
 			puts "No permission in path [#{path}]"
 			exit
 		end
+		return
 	else
 		parent_path = File.expand_path("..", path)
 		prepare_install_path(parent_path)
