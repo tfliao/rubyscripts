@@ -10,6 +10,7 @@ def parse()
 	options.binary = false
 	options.key = ""
 	options.basedirs = ["."]
+	options.excludes = []
 
 	parser = OptionParser.new do |opts|
 		# banner for help message
@@ -24,7 +25,7 @@ def parse()
 		end
 		opts.on_tail("--version", "show version") do
 			basename = File.basename(__FILE__, ".rb")
-			puts "#{basename} 1.0.0"
+			puts "#{basename} 1.1.0"
 			exit
 		end
 
@@ -37,6 +38,9 @@ def parse()
 		end
 		opts.on("-b", "--[no-]binary", "show binary files") do |v|
 			options.binary = v
+		end
+		opts.on("-e=pattern,...", "--exclude=pattern,...", Array, "exclude files with particular pattern") do |e|
+			options.excludes.concat(e)
 		end
 
 	end
@@ -67,6 +71,10 @@ else
 		end
 		f
 	end
+end
+
+o.excludes.each do |e|
+	files.delete_if { |f| /#{e}/.match(f) != NIL }
 end
 
 if o.vim then
