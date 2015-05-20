@@ -24,7 +24,7 @@ def parse()
 		end
 		opts.on_tail("--version", "show version") do
 			basename = File.basename(__FILE__, ".rb")
-			puts "#{basename} 1.0.1"
+			puts "#{basename} 1.1.1"
 			exit
 		end
 
@@ -49,7 +49,6 @@ def show_message(msg, always_show=false)
 end
 
 def update(basename)
-	Dir.mkdir($options.install_path) if !File.exist?($options.install_path)
 	FileUtils.mv("#{basename}.rb", "#{$options.install_path}/#{basename}")
 	show_message("scripts #{basename} updated", true)
 end
@@ -59,7 +58,25 @@ def command?(cmd)
 	$?.success?
 end
 
+def prepare_install_path(path)
+	if File.exists?(path)
+		if File.writable?(path) == NIL then
+			puts "No permission in path [#{path}]"
+			exit
+		end
+	else
+		parent_path = File.expand_path("..", path)
+		prepare_install_path(parent_path)
+	end
+	Dir.mkdir(path)
+end
+
+
 $options = parse()
+
+# handle install path
+
+prepare_install_path($options.install_path)
 
 
 Dir.chdir("/tmp") do
