@@ -24,7 +24,7 @@ def parse()
 		end
 		opts.on_tail("--version", "show version") do
 			basename = File.basename(__FILE__, ".rb")
-			puts "#{basename} 1.0.0"
+			puts "#{basename} 1.0.1"
 			exit
 		end
 
@@ -79,6 +79,8 @@ Dir.chdir("/tmp") do
 		scripts.each do |s|
 			basename = File.basename(s, ".rb")
 			final_name = "#{$options.install_path}/#{basename}"
+
+			next if basename == 'clibase'
 
 			if ! File.exist?(final_name) then
 				show_message("scripts #{basename} not exists", $options.check_only)
