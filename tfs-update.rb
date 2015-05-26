@@ -25,7 +25,7 @@ def parse()
 		end
 		opts.on_tail("--version", "show version") do
 			basename = File.basename(__FILE__, ".rb")
-			puts "#{basename} 1.2.2"
+			puts "#{basename} 1.2.3"
 			exit
 		end
 
@@ -53,8 +53,15 @@ def show_message(msg, always_show=false)
 end
 
 def update(basename)
-	FileUtils.mv("#{basename}.rb", "#{$options.install_path}/#{basename}")
-	show_message("scripts [#{basename}] updated", true)
+	final_name = "#{$options.install_path}/#{basename}"
+	if File.exists?(final_name) then
+		if File.writable?(final_name) == NIL then
+			show_message("script [#{basename}] NOT updated, No permission", true)
+			return
+		end
+	end
+	FileUtils.mv("#{basename}.rb", final_name)
+	show_message("script [#{basename}] updated", true)
 end
 
 def command?(cmd)
@@ -108,7 +115,7 @@ def remove_script(script)
 		show_message("script [#{basename}] is deprecated")
 		return if $options.check_only
 		FileUtils.rm(install_name)
-		show_message("scripts [#{basename}] is removed", $options.check_only)
+		show_message("script [#{basename}] is removed", $options.check_only)
 	end
 
 end
