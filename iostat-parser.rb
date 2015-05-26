@@ -10,6 +10,7 @@ def parse()
 	options.limit = 99999999
 	options.devices = []
 	options.fields = ["file", "device", "property", "sample", "mean", "stdev", "minmax", "large-count", "small-count"]
+	options.alignment = "human"
 	options.files = []
 
 	parser = OptionParser.new do |opts|
@@ -25,7 +26,7 @@ def parse()
 		end
 		opts.on_tail("--version", "show version") do
 			basename = File.basename(__FILE__, ".rb")
-			puts "#{basename} 1.0.0"
+			puts "#{basename} 1.1.0"
 			exit
 		end
 
@@ -44,6 +45,9 @@ def parse()
 		end
 		opts.on("-f=F1, ...", "--fields=F1, ...", Array, "select result fields (#{options.fields.join(",")})") do |f|
 			options.fields = f
+		end
+		opts.on("-a=mode", "--align=mode", "alignment mode (human, tab, space)") do |a|
+			options.alignment = a
 		end
 	end
 	options.files = parser.parse!
@@ -151,6 +155,9 @@ def load_data()
 end
 
 def format_field(field, result, float_part)
+	separator = ", "
+	separator = "," if $options.alignment != "human"
+
 	case field
 		when "file" then return result.file
 		when "device" then return result.device
@@ -158,9 +165,9 @@ def format_field(field, result, float_part)
 		when "sample" then return "#{result.sample}"
 		when "mean" then return "#{result.mean.round(float_part)}"
 		when "stdev" then return "#{result.stdev.round(float_part)}"
-		when "minmax" then return "(#{result.minmax[0].round(float_part)}, #{result.minmax[1].round(float_part)})"
-		when "large-count" then return "#{result.count_large.join(", ")}"
-		when "small-count" then return "#{result.count_small.join(", ")}"
+		when "minmax" then return "(#{result.minmax[0].round(float_part)}#{separator}#{result.minmax[1].round(float_part)})"
+		when "large-count" then return "#{result.count_large.join(separator)}"
+		when "small-count" then return "#{result.count_small.join(separator)}"
 		else return "-"
 	end
 end
@@ -176,14 +183,29 @@ def output()
 
 	header = ""
 	$options.fields.each do |f|
-		header << ("%*s" % [ -(width[f] + 1), f] )
+		case $options.alignment
+		when "tab"
+			header << "#{f}\t"
+		when "space"
+			header << "#{f} "
+		else # human reading
+			header << ("%*s" % [ -(width[f] + 1), f] )
+		end
 	end
 	puts header
 
 	$results.each do |rs|
 		line = ""
 		$options.fields.each do |f|
-			line << ("%*s" % [ -(width[f] + 1), format_field(f, rs, 2)])
+			value = format_field(f, rs, 2)
+			case $options.alignment
+			when "tab"
+				line << "#{value}\t"
+			when "space"
+				line << "#{value} "
+			else # human reading
+				line << ("%*s" % [ -(width[f] + 1), value])
+			end
 		end
 		puts line
 	end
