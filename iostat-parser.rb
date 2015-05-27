@@ -26,7 +26,7 @@ def parse()
 		end
 		opts.on_tail("--version", "show version") do
 			basename = File.basename(__FILE__, ".rb")
-			puts "#{basename} 1.1.0"
+			puts "#{basename} 1.1.1"
 			exit
 		end
 
@@ -119,6 +119,10 @@ def load_data()
 				data[key].skip_count = 0
 				data[key].data_points = []
 			end
+		end
+		if !File.file?(f) then
+			puts "[#{f}] is not a file, skip it"
+			next
 		end
 		fp = File.open(f)
 		fp.each_line.with_index do |line|

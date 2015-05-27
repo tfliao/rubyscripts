@@ -22,7 +22,7 @@ def parse()
 		end
 		opts.on_tail("--version", "show version") do
 			basename = File.basename(__FILE__, ".rb")
-			puts "#{basename} 1.0.0"
+			puts "#{basename} 1.0.1"
 			exit
 		end
 
@@ -101,6 +101,10 @@ if $options.files.empty?
 	parsefile(STDIN, NIL)
 else
 	$options.files.each do |f|
+		if !File.file?(f) then
+			puts "[#{f}] is not a file, skip it"
+			next
+		end
 		fp = File.open(f)
 		parsefile(fp, f)
 		fp.close()
