@@ -25,7 +25,7 @@ def parse()
 		end
 		opts.on_tail("--version", "show version") do
 			basename = File.basename(__FILE__, ".rb")
-			puts "#{basename} 1.2.3"
+			puts "#{basename} 1.2.4"
 			exit
 		end
 
@@ -55,7 +55,7 @@ end
 def update(basename)
 	final_name = "#{$options.install_path}/#{basename}"
 	if File.exists?(final_name) then
-		if File.writable?(final_name) == NIL then
+		if !File.writable?(final_name) then
 			show_message("script [#{basename}] NOT updated, No permission", true)
 			return
 		end
@@ -71,7 +71,7 @@ end
 
 def prepare_install_path(path)
 	if File.exists?(path)
-		if File.writable?(path) == NIL then
+		if !File.writable?(path) then
 			puts "No permission in path [#{path}]"
 			exit
 		end
