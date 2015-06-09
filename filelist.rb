@@ -10,6 +10,7 @@ def parse()
 	options.binary = false
 	options.key = ""
 	options.basedirs = ["."]
+	options.nocase = false
 	options.excludes = []
 
 	parser = OptionParser.new do |opts|
@@ -25,7 +26,7 @@ def parse()
 		end
 		opts.on_tail("--version", "show version") do
 			basename = File.basename(__FILE__, ".rb")
-			puts "#{basename} 1.1.0"
+			puts "#{basename} 1.2.0"
 			exit
 		end
 
@@ -38,6 +39,9 @@ def parse()
 		end
 		opts.on("-b", "--[no-]binary", "show binary files") do |v|
 			options.binary = v
+		end
+		opts.on("-i", "--ignore-case", "Ignore case distinctions") do |v|
+			options.nocase = v
 		end
 		opts.on("-e=pattern,...", "--exclude=pattern,...", Array, "exclude files with particular pattern") do |e|
 			options.excludes.concat(e)
@@ -58,8 +62,10 @@ end
 
 o = parse()
 
+nocase = ""
+nocase = "-i" if o.nocase
 
-files = `grep -nr "#{o.key}" #{o.basedirs.join(' ')} | cut -d: -f1 | uniq`.split("\n")
+files = `grep #{nocase} -nr "#{o.key}" #{o.basedirs.join(' ')} | cut -d: -f1 | uniq`.split("\n")
 
 # remove binary files
 if !o.binary then
