@@ -4,6 +4,8 @@ require 'ostruct'
 
 def parse()
 	# init
+	basename = File.basename(__FILE__, ".rb")
+
 	options = OpenStruct.new
 	options.columns = []
 	options.skip = 1
@@ -15,7 +17,7 @@ def parse()
 
 	parser = OptionParser.new do |opts|
 		# banner for help message
-		opts.banner =  "Usage: #{$0} [options] args ... "
+		opts.banner =  "Usage: #{basename} [options] args ... "
 		opts.separator "       parse iostat result as statistic output"
 		opts.separator ""
 
@@ -25,8 +27,7 @@ def parse()
 			exit
 		end
 		opts.on_tail("--version", "show version") do
-			basename = File.basename(__FILE__, ".rb")
-			puts "#{basename} 1.1.1"
+			puts "#{basename} 1.1.2"
 			exit
 		end
 

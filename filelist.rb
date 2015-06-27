@@ -4,6 +4,8 @@ require 'ostruct'
 
 def parse()
 	# init
+	basename = File.basename(__FILE__, ".rb")
+
 	options = OpenStruct.new
 	options.single = false
 	options.vim = false
@@ -15,7 +17,7 @@ def parse()
 
 	parser = OptionParser.new do |opts|
 		# banner for help message
-		opts.banner =  "Usage: #{$0} [options] key [basedir]"
+		opts.banner =  "Usage: #{basename} [options] key [basedir]"
 		opts.separator "       collect files that contain key"
 		opts.separator ""
 
@@ -26,7 +28,7 @@ def parse()
 		end
 		opts.on_tail("--version", "show version") do
 			basename = File.basename(__FILE__, ".rb")
-			puts "#{basename} 1.2.0"
+			puts "#{basename} 1.2.1"
 			exit
 		end
 

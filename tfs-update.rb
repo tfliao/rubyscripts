@@ -5,6 +5,8 @@ require 'fileutils'
 
 def parse()
 	# init
+	basename = File.basename(__FILE__, ".rb")
+
 	options = OpenStruct.new
 	options.check_only = false
 	options.verbose = false
@@ -14,7 +16,7 @@ def parse()
 
 	parser = OptionParser.new do |opts|
 		# banner for help message
-		opts.banner =  "Usage: #{$0} [options] scripts ... "
+		opts.banner =  "Usage: #{basename} [options] scripts ... "
 		opts.separator "       auto update scripts in this project"
 		opts.separator ""
 
@@ -24,8 +26,7 @@ def parse()
 			exit
 		end
 		opts.on_tail("--version", "show version") do
-			basename = File.basename(__FILE__, ".rb")
-			puts "#{basename} 1.2.4"
+			puts "#{basename} 1.2.5"
 			exit
 		end
 

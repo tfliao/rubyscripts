@@ -4,6 +4,8 @@ require 'ostruct'
 
 def parse()
 	# init
+	basename = File.basename(__FILE__, ".rb")
+
 	options = OpenStruct.new
 	options.order = []
 	options.verbose = false
@@ -11,7 +13,7 @@ def parse()
 	options.field = 'auto'
 
 	parser = OptionParser.new do |opts|
-		opts.banner =  "Usage: #{$0} [options] files ..."
+		opts.banner =  "Usage: #{basename} [options] files ..."
 		opts.separator "       parser to parse iometer result csv files to a copy friendly format"
 		opts.separator ""
 
@@ -21,7 +23,6 @@ def parse()
 			exit
 		end
 		opts.on_tail("--version", "show version") do
-			basename = File.basename(__FILE__, ".rb")
 			puts "#{basename} 1.0.1"
 			exit
 		end
