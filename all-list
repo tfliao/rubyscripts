@@ -2,3 +2,4 @@ filelist.rb
 iometer-parser.rb
 tfs-update.rb
 iostat-parser.rb
+icf-gen.rb
