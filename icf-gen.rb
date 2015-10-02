@@ -91,11 +91,18 @@ def parse()
 	end
 	options.remains = parser.parse!
 
+	msg = NIL
+	msg = "runtime not set" if options.runtime == NIL
+	msg = "no manager specified" if options.managers.count == 0
+	msg = "no test spec specified" if options.specs.count == 0
+
+	if msg != NIL
+		puts msg
+		puts parser.help()
+		exit 1
+	end
+
 	options
-end
-
-def check_options(option)
-
 end
 
 def write_version(fp, option)
@@ -245,7 +252,6 @@ if o.file != NIL then
 end
 
 fp = STDOUT if fp == NIL
-
 
 write_version(fp, o)
 write_test_setup(fp, o)
