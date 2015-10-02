@@ -60,6 +60,15 @@ def show(key, value)
 	end
 end
 
+def maybethroughput(key)
+	return true if key.index('throughput') != NIL
+	return true if key.index('32K') != NIL
+	return true if key.index('64K') != NIL
+	return true if key.index('32768') != NIL
+	return true if key.index('65536') != NIL
+	return false
+end
+
 def parsefile(fp, name)
 	puts "File: #{name}" if name != NIL
 	data = Hash.new
@@ -75,7 +84,7 @@ def parsefile(fp, name)
 				value = tokens[9] # MB/s
 			else
 				value = tokens[6] # IOPS
-				if key.index('throughput') != NIL || key.index('64K') != NIL || key.index('32K') != NIL
+				if maybethroughput(key)
 					value = tokens[9] # MB/s
 				end
 			end
