@@ -20,6 +20,7 @@ def parse()
 	options.outstanding = 1
 	options.thread = 1
 	options.space = 0
+	options.onepc = false
 	options.target = "PHYSICALDRIVE:3"
 	options.specs = []
 
@@ -37,7 +38,7 @@ def parse()
 			exit
 		end
 		opts.on_tail("--version", "show version") do
-			puts "#{basename} 1.0.1"
+			puts "#{basename} 1.1.1"
 			exit
 		end
 
@@ -74,6 +75,10 @@ def parse()
 
 		opts.on("-T=T", "--thread=T", "number of thread for each target") do |t|
 			options.thread = t.to_i
+		end
+
+		opts.on("-1", "--onepc", "use only single pc, bug act as multiple") do |o|
+			options.onepc = o
 		end
 
 		opts.on("-s=s,...", "--spec=s,...", Array, "Specification to test with (xK R(andom)/S(equential) R(ead)/W(rite)") do |s|
@@ -207,17 +212,18 @@ fp.printf "'END access specifications\n"
 
 end
 
-def write_worker(fp, option)
+def write_worker(fp, option, manager_id)
 
 	thread = option.thread
 	space = option.space
 
-	prefix, num = option.target.split(':', 2)
+	prefix, start_num = option.target.split(':', 2)
+	start_num = start_num.to_i + manager_id * (option.workers / thread)
 
 	1.upto(option.workers) do |id|
 
-		start_sector = ((id-1) % thread) * space
-		target = "#{prefix}:#{num.to_i + (id - 1) / thread}"
+		start_sector = ((id - 1) % thread) * space
+		target = "#{prefix}:#{start_num + (id - 1) / thread}"
 
 		fp.printf "'Worker
 	Worker %d
@@ -232,7 +238,7 @@ def write_worker(fp, option)
 'Assigned access specs
 ", id, option.outstanding, start_sector # fix later
 		option.specs.each do |s|
-			fp.printf "\t#{s[0]} #{s[1]} #{s[2]}\n"
+			fp.printf "\t#{_scalize(s[0])} #{s[1]} #{s[2]}\n"
 		end
 		fp.printf "'End assigned access specs
 'Target assignments
@@ -258,7 +264,11 @@ option.managers.each do |m|
 'Manager network address
 	%s
 ", id, name ,ip
-	write_worker(fp, option)
+	if option.onepc then
+		write_worker(fp, option, id - 1)
+	else
+		write_worker(fp, option, 0)
+	end
 	fp.printf "'End manager\n"
 	id = id + 1
 end
