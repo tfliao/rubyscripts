@@ -2,6 +2,12 @@
 require 'optparse'
 require 'ostruct'
 
+STR_RAND='Random'
+STR_SEQ='Sequential'
+
+STR_READ='Read'
+STR_WRITE='Write'
+
 def parse()
 	# init
 	basename = File.basename(__FILE__, ".rb")
@@ -31,7 +37,7 @@ def parse()
 			exit
 		end
 		opts.on_tail("--version", "show version") do
-			puts "#{basename} 1.0.0"
+			puts "#{basename} 1.0.1"
 			exit
 		end
 
@@ -78,11 +84,11 @@ def parse()
 				size = data[1].to_i
 				size = size * 1024 if data[2] == 'K'
 
-				type = 'random'
-				type = 'seq' if rs[0].upcase == 'S'
+				type = STR_RAND
+				type = STR_SEQ if rs[0].upcase == 'S'
 
-				io = 'read'
-				io = 'write' if rw[0].upcase == 'W'
+				io = STR_READ
+				io = STR_WRITE if rw[0].upcase == 'W'
 
 				options.specs << [size, type, io]
 			end
@@ -160,14 +166,30 @@ def write_result_display(fp, option)
 "
 end
 
+def _scalize(x)
+	kilo = 1024
+	postfix=['K', 'M', 'G', 'T', 'P']
+	order=''
+
+	0.upto(4) do |i|
+		if x % kilo != 0 then
+			break
+		end
+		x = x / kilo
+		order = postfix[i]
+	end
+
+	return "#{x}#{order}"
+end
+
 def write_specification(fp, option)
 
 specification = {}
 option.specs.each do |s|
-	name = "#{s[0]} #{s[1]} #{s[2]}"
+	name = "#{_scalize(s[0])} #{s[1]} #{s[2]}"
 	p_read, p_rand = 100, 100
-	p_rand = 0 if s[1] == 'seq'
-	p_read = 0 if s[2] == 'write'
+	p_rand = 0 if s[1] == STR_SEQ
+	p_read = 0 if s[2] == STR_WRITE
 	conf = [s[0], 100, p_read, p_rand, 0, 1, 0, 0]
 	pattern = "#{conf.join(',')}"
 	specification[name] = pattern
