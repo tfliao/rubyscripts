@@ -8,6 +8,8 @@ STR_SEQ='Sequential'
 STR_READ='Read'
 STR_WRITE='Write'
 
+STR_IDLE='Idle'
+
 def parse()
 	# init
 	basename = File.basename(__FILE__, ".rb")
@@ -38,7 +40,7 @@ def parse()
 			exit
 		end
 		opts.on_tail("--version", "show version") do
-			puts "#{basename} 1.1.1"
+			puts "#{basename} 1.1.2"
 			exit
 		end
 
@@ -83,6 +85,11 @@ def parse()
 
 		opts.on("-s=s,...", "--spec=s,...", Array, "Specification to test with (xK R(andom)/S(equential) R(ead)/W(rite)") do |s|
 			s.each do |ss|
+				if ss.upcase == 'IDLE' then
+					options.specs << [STR_IDLE, STR_IDLE, STR_IDLE]
+					next
+				end
+
 				size, rs, rw = ss.split(' ', 3)
 				data = /([0-9]+)(K?)/.match(size)
 				next if data == NIL
@@ -191,6 +198,7 @@ def write_specification(fp, option)
 
 specification = {}
 option.specs.each do |s|
+	next if s[0] == STR_IDLE
 	name = "#{_scalize(s[0])} #{s[1]} #{s[2]}"
 	p_read, p_rand = 100, 100
 	p_rand = 0 if s[1] == STR_SEQ
@@ -238,7 +246,11 @@ def write_worker(fp, option, manager_id)
 'Assigned access specs
 ", id, option.outstanding, start_sector # fix later
 		option.specs.each do |s|
-			fp.printf "\t#{_scalize(s[0])} #{s[1]} #{s[2]}\n"
+			if s[0] == STR_IDLE then
+				fp.printf "\t#{STR_IDLE}\n"
+			else
+				fp.printf "\t#{_scalize(s[0])} #{s[1]} #{s[2]}\n"
+			end
 		end
 		fp.printf "'End assigned access specs
 'Target assignments
