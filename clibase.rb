@@ -3,9 +3,17 @@ require 'optparse'
 require 'ostruct'
 
 class CliBase
-	@options = NIL
+	@basename = File.basename(__FILE__, ".rb")
+	@version  = '1.0.0'
+	@options  = NIL
 
-	def _parse_init()
+	def run()
+		puts __parse(ARGV)
+	end
+
+	private
+
+	def __parse_init()
 		@options = OpenStruct.new
 		@options.verbose = false
 		@options.list = []
@@ -13,15 +21,14 @@ class CliBase
 		@options.remains = []
 	end
 
-	def parse(argv)
+	def __parse(argv)
 		# init
-		basename = File.basename(__FILE__, ".rb")
 
-		_parse_init()
+		__parse_init()
 
 		parser = OptionParser.new do |opts|
 			# banner for help message
-			opts.banner =  "Usage: #{basename} [options] args ... "
+			opts.banner =  "Usage: #{@basename} [options] args ... "
 			opts.separator "       <description of program here>"
 			opts.separator ""
 
@@ -31,7 +38,7 @@ class CliBase
 				exit
 			end
 			opts.on_tail("--version", "show version") do
-				puts "#{basename} 1.0.0"
+				puts "#{@basename} #{@version}"
 				exit
 			end
 
@@ -53,11 +60,10 @@ class CliBase
 
 		@options
 	end
-	def run()
-		puts parse(ARGV)
-	end
 end
 
 if __FILE__ == $0 then
-	CliBase.new.run
+	cb = CliBase.new
+	cb.run
 end
+
