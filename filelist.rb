@@ -27,7 +27,7 @@ class FileList
 	end
 
 	def __parse(argv)
-		# init
+
 		__parse_init
 
 		parser = OptionParser.new do |opts|

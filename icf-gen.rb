@@ -53,6 +53,7 @@ class IcfGen
 	end
 
 	def __parse(argv)
+
 		__parse_init
 
 		parser = OptionParser.new do |opts|

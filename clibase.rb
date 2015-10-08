@@ -22,7 +22,6 @@ class CliBase
 	end
 
 	def __parse(argv)
-		# init
 
 		__parse_init()
 
