@@ -52,6 +52,25 @@ class IcfGen
 		@options.remains = []
 	end
 
+	def __param_check()
+		pass = true
+
+		msg = NIL
+		if @options.runtime == NIL then
+			puts "runtime not set"
+			pass = false
+		end
+		if @options.managers.count == 0 then
+			puts "no manager specified"
+			pass = false
+		end
+		if @options.specs.count == 0 then
+			puts "no test spec specified"
+			pass = false
+		end
+		pass
+	end
+
 	def __parse(argv)
 
 		__parse_init
@@ -137,13 +156,7 @@ class IcfGen
 		end
 		@options.remains = parser.parse(argv)
 
-		msg = NIL
-		msg = "runtime not set" if @options.runtime == NIL
-		msg = "no manager specified" if @options.managers.count == 0
-		msg = "no test spec specified" if @options.specs.count == 0
-
-		if msg != NIL
-			puts msg
+		if !__param_check() then
 			puts parser.help()
 			exit 1
 		end

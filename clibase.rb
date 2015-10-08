@@ -21,6 +21,12 @@ class CliBase
 		@options.remains = []
 	end
 
+	def __param_check()
+		pass = true
+		# some test here
+		pass
+	end
+
 	def __parse(argv)
 
 		__parse_init()
@@ -56,6 +62,11 @@ class CliBase
 			end
 		end
 		@options.remains = parser.parse(argv)
+
+		if ! __param_check() then
+			puts parser.help()
+			exit 1
+		end
 
 		@options
 	end
