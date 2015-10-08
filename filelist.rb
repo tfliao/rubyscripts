@@ -3,10 +3,12 @@ require 'optparse'
 require 'ostruct'
 
 class FileList
-	@basename = File.basename(__FILE__, ".rb")
-	@version  = '1.3.0'
-	@options = NIL
-	@files = NIL
+	def initialize()
+		@basename = File.basename(__FILE__, ".rb")
+		@version  = '1.3.1'
+		@files = NIL
+		__parse_init
+	end
 
 	def run()
 		__parse(ARGV)
@@ -27,9 +29,6 @@ class FileList
 	end
 
 	def __parse(argv)
-
-		__parse_init
-
 		parser = OptionParser.new do |opts|
 			# banner for help message
 			opts.banner =  "Usage: #{@basename} [options] key [basedir]"

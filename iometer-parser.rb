@@ -3,9 +3,11 @@ require 'optparse'
 require 'ostruct'
 
 class IometerParser
-	@basename = File.basename(__FILE__, ".rb")
-	@version  = '1.1.0'
-	@options  = NIL
+	def initialize()
+		@basename = File.basename(__FILE__, ".rb")
+		@version  = '1.1.1'
+		__parse_init
+	end
 
 	def run()
 		__parse(ARGV)
@@ -35,9 +37,6 @@ class IometerParser
 	end
 
 	def __parse(argv)
-
-		__parse_init
-
 		parser = OptionParser.new do |opts|
 			opts.banner =  "Usage: #{@basename} [options] files ..."
 			opts.separator "       parser to parse iometer result csv files to a copy friendly format"

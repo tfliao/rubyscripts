@@ -4,9 +4,12 @@ require 'ostruct'
 require 'fileutils'
 
 class TfsUpdate
-	@basename = File.basename(__FILE__, ".rb")
-	@version  = '1.3.0'
-	@options  = NIL
+	def initialize()
+		@basename = File.basename(__FILE__, ".rb")
+		@version  = '1.3.1'
+		@results = []
+		__parse_init
+	end
 
 	def run()
 		__parse(ARGV)
@@ -64,9 +67,6 @@ class TfsUpdate
 	end
 
 	def __parse(argv)
-
-		__parse_init
-
 		parser = OptionParser.new do |opts|
 			# banner for help message
 			opts.banner =  "Usage: #{@basename} [@options] scripts ... "

@@ -3,9 +3,12 @@ require 'optparse'
 require 'ostruct'
 
 class CliBase
-	@basename = File.basename(__FILE__, ".rb")
-	@version  = '1.0.0'
-	@options  = NIL
+
+	def initialize()
+		@basename = File.basename(__FILE__, ".rb")
+		@version  = '1.0.0'
+		__parse_init
+	end
 
 	def run()
 		puts __parse(ARGV)
@@ -28,9 +31,6 @@ class CliBase
 	end
 
 	def __parse(argv)
-
-		__parse_init()
-
 		parser = OptionParser.new do |opts|
 			# banner for help message
 			opts.banner =  "Usage: #{@basename} [options] args ... "

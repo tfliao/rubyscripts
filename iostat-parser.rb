@@ -3,10 +3,12 @@ require 'optparse'
 require 'ostruct'
 
 class IostatParser
-	@basename = File.basename(__FILE__, ".rb")
-	@version  = '1.2.0'
-	@options  = NIL
-	@results = []
+	def initialize()
+		@basename = File.basename(__FILE__, ".rb")
+		@version  = '1.2.1'
+		@results = []
+		__parse_init
+	end
 
 	def run()
 		__parse(ARGV)
@@ -45,9 +47,6 @@ class IostatParser
 	end
 
 	def __parse(argv)
-
-		__parse_init
-
 		parser = OptionParser.new do |opts|
 			# banner for help message
 			opts.banner =  "Usage: #{@basename} [options] args ... "

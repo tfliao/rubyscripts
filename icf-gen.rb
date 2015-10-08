@@ -3,11 +3,12 @@ require 'optparse'
 require 'ostruct'
 
 class IcfGen
-	@basename = File.basename(__FILE__, ".rb")
-	@version  = '1.2.0'
-	@options  = NIL
-
-	@ofile = NIL
+	def initialize()
+		@basename = File.basename(__FILE__, ".rb")
+		@version  = '1.2.1'
+		@ofile = NIL
+		__parse_init
+	end
 
 	STR_RAND='Random'
 	STR_SEQ='Sequential'
@@ -72,9 +73,6 @@ class IcfGen
 	end
 
 	def __parse(argv)
-
-		__parse_init
-
 		parser = OptionParser.new do |opts|
 			# banner for help message
 			opts.banner =  "Usage: #{@basename} [options] args ... "
