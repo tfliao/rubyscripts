@@ -5,7 +5,7 @@ require 'ostruct'
 class IcfGen
 	def initialize()
 		@basename = File.basename(__FILE__, ".rb")
-		@version  = '1.2.1'
+		@version  = '1.3.0'
 		@ofile = NIL
 		__parse_init
 	end
@@ -42,6 +42,7 @@ class IcfGen
 		@options = OpenStruct.new
 		@options.file = NIL
 		@options.runtime = NIL
+		@options.ramptime = 0
 		@options.managers = []
 		@options.workers = 1
 		@options.outstanding = 1
@@ -95,6 +96,10 @@ class IcfGen
 
 			opts.on("-r=R", "--runtime=R", "runtime for test (hh:mm:ss)") do |r|
 				@options.runtime = r.split(':', 3).map(&:to_i)
+			end
+
+			opts.on("-R=R", "--ramptime=R", "ramp up time (in seconds)") do |r|
+				@options.ramptime = r.to_i
 			end
 
 			opts.on("-m=m, ...", "--managers=m, ...", Array, "managers informations") do |m|
@@ -174,7 +179,7 @@ class IcfGen
 		@ofile.printf "'	hours      minutes    seconds\n"
 		@ofile.printf "	%d          %d         %d\n", @options.runtime[0], @options.runtime[1], @options.runtime[2]
 		@ofile.printf "'Ramp Up Time (s)\n"
-		@ofile.printf "	0\n"
+		@ofile.printf "	%d\n", @options.ramptime
 		@ofile.printf "'Default Disk Workers to Spawn\n"
 		@ofile.printf "	NUMBER_OF_CPUS\n"
 		@ofile.printf "'Default Network Workers to Spawn\n"
