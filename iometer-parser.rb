@@ -5,12 +5,18 @@ require 'ostruct'
 class IometerParser
 	def initialize()
 		@basename = File.basename(__FILE__, ".rb")
-		@version  = '1.1.1'
+		@version  = '1.2.0'
 		__parse_init
 	end
 
+	STR_IOPS='iops'
+	STR_MBPS='mb/s'
+	STR_RESP='resp'
+	STR_ALL ='all'
+
 	def run()
 		__parse(ARGV)
+		@options.fields << 'auto' if @options.fields.empty?
 		if @options.files.empty?
 			__parsefile(STDIN, NIL)
 		else
@@ -33,7 +39,7 @@ class IometerParser
 		@options.order = []
 		@options.verbose = false
 		@options.result = 'raw'
-		@options.field = 'auto'
+		@options.fields = []
 	end
 
 	def __parse(argv)
@@ -53,13 +59,13 @@ class IometerParser
 			end
 
 			# specific options
-			opts.on("-o=O1, ...", "--order=O1, ...", Array, "order of result") do |v|
+			opts.on("-o=O, ...", "--order=O, ...", Array, "order of result") do |v|
 				@options.order.concat(v)
 			end
 			opts.on("-v", "--verbose", "force show some message") do |v| @options.verbose = v end
 			opts.on("-r=R", "--result=R", "available:raw, avg, ...") do |v| @options.result = v end
 
-			opts.on("-f=F", "--field=F", "available: iops, MB/s, ...") do |v| @options.field = v end
+			opts.on("-f=F, ...", "--fields=F, ...", Array, "available: iops, MB/s, Resp, all, ...") do |v| @options.fields.concat(v) end
 
 		end
 		@options.files = parser.parse(argv)
@@ -74,13 +80,15 @@ class IometerParser
 			return
 		end
 
-		case result
-		when 'avg'
-			avg = value.inject(0.0) { |s, v| s + v.to_f } / value.size
-			puts "%.4f" % avg + "\t" + key
-		else # other including raw
-			value.each_with_index do |v, n|
-				puts v + (n==0 ? "\t[" + key + "]" : "")
+		value.each do |field, val|
+			case result
+			when 'avg'
+				avg = val.inject(0.0) { |s, v| s + v.to_f } / val.size
+				puts "%13.5f\t%s\t[%s]" % [avg, field, key]
+			else # other including raw
+				val.each_with_index do |v, n|
+					puts "%13.5f" % v + (n==0 ? "\t%s\t[%s]" % [field, key] : "")
+				end
 			end
 		end
 	end
@@ -102,19 +110,32 @@ class IometerParser
 			tokens = line.split(',')
 			if tokens[0] == 'ALL'
 				key = tokens[2]
-				case @options.field.downcase
-				when 'iops'
-					value = token [6] # IOPS
-				when 'mb/s'
-					value = tokens[9] # MB/s
-				else
-					value = tokens[6] # IOPS
-					if __maybethroughput(key)
-						value = tokens[9] # MB/s
+				value = Hash.new
+				@options.fields.each do |f|
+					case f.downcase
+					when STR_IOPS
+						value[STR_IOPS] = tokens[6] # IOPS
+					when STR_MBPS
+						value[STR_MBPS] = tokens[9] # MB/s
+					when STR_RESP
+						value[STR_RESP] = tokens[17] # response time
+					when STR_ALL
+						value[STR_IOPS] = tokens[6] # IOPS
+						value[STR_MBPS] = tokens[9] # MB/s
+						value[STR_RESP] = tokens[17] # response time
+					else
+						if __maybethroughput(key)
+							value[STR_MBPS] = tokens[9] # MB/s
+						else
+							value[STR_IOPS] = tokens[6] # IOPS
+						end
 					end
 				end
-				data[key] = Array.new if !data.has_key?(key)
-				data[key] << value
+				data[key] = Hash.new if !data.has_key?(key)
+				value.each do |k,v|
+					data[key][k] = Array.new if !data[key].has_key?(k)
+					data[key][k] << v
+				end
 			end
 		end
 
