@@ -73,6 +73,105 @@ class IcfGen
 		pass
 	end
 
+	def __complete_spec(spec)
+		if spec['idle'] then
+			spec['key'] = STR_IDLE
+			return spec
+		end
+
+		return NIL if spec == NIL
+
+		return NIL if spec['size'] == NIL
+		return NIL if spec['randomness'] == NIL
+		return NIL if spec['iorate'] == NIL
+		spec['align'] = false if spec['align'] == NIL
+
+		spec['idle'] = false if spec['idle'] == NIL
+
+		key = "#{__scalize(spec['size'])} "
+		key += "aligned " if spec['align']
+		case spec['randomness']
+		when 0
+			key += "#{STR_SEQ} "
+		when 100
+			key += "#{STR_RAND} "
+		else
+			key += "#{spec['randomness']} #{STR_RAND} "
+		end
+
+		case spec['iorate']
+		when 0
+			key += "#{STR_WRITE}"
+		when 100
+			key += "#{STR_READ}"
+		else
+			key += "#{spec['iorate']} #{STR_READ}"
+		end
+		spec['key'] = key
+
+		return spec
+	end
+
+	def __parse_spec(str)
+# Idle
+#
+# XK
+#	 [align[ed]]
+#                ??%   S[equential]
+#                ??%   R[andom]
+#                                   ??%     W[rite]
+#                                   ??%     R[ead]
+##		type:       Idle / IO / error
+##      size:       XK
+##      aligned:    true / false
+##      randomness: ??%
+##      iorate:     ??%
+		tokens = str.split
+		token = tokens.shift
+		return NIL if token == NIL
+
+		spec = Hash.new
+
+		if token.upcase == STR_IDLE.upcase then
+			spec['idle'] = true
+			return __complete_spec(spec)
+		end
+
+		percent = 100
+		while token != NIL do
+			if data = /^([0-9]+)([KMkm]?)$/.match(token) then
+			#	puts "1. #{token}"
+				size = data[1].to_i
+				size = size * 1024 if data[2].upcase == 'K'
+				size = size * 1024 * 1024 if data[2].upcase == 'M'
+				spec['size'] = size
+			elsif /^ALIGN/.match(token.upcase) then
+			#	puts "2. #{token}"
+				spec['align'] = true
+			elsif data = /^([0-9]+)%$/.match(token) then
+			#	puts "3. #{token}"
+				percent = data[1].to_i
+			else
+			#	puts "4. #{token}"
+				if /^S/.match(token.upcase) then
+					spec['randomness'] = 100 - percent
+				elsif /^RA/.match(token.upcase) then
+					spec['randomness'] = percent
+				elsif /^W/.match(token.upcase) then
+					spec['iorate'] = 100 - percent
+				elsif /^RE/.match(token.upcase) then
+					spec['iorate'] = percent
+				else
+					puts "Bad pattern #{token}"
+				end
+				percent = 100
+			end
+			token = tokens.shift
+		end
+
+		return __complete_spec(spec)
+	end
+
 	def __parse(argv)
 		parser = OptionParser.new do |opts|
 			# banner for help message
@@ -117,7 +216,7 @@ class IcfGen
 				@options.outstanding = o.to_i
 			end
 
-			opts.on("-t=t", "--target=t", "target pattern (e.g. PHYSICALDRIVE:3)") do |t|
+			opts.on("-t=t", "--target=t", "target pattern (e.g. PHYSICALDRIVE:(3+))") do |t|
 				@options.target = t
 			end
 
@@ -135,24 +234,9 @@ class IcfGen
 
 			opts.on("-s=s,...", "--spec=s,...", Array, "Specification to test with (xK R(andom)/S(equential) R(ead)/W(rite)") do |s|
 				s.each do |ss|
-					if ss.upcase == 'IDLE' then
-						@options.specs << [STR_IDLE, STR_IDLE, STR_IDLE]
-						next
-					end
-
-					size, rs, rw = ss.split(' ', 3)
-					data = /([0-9]+)(K?)/.match(size)
-					next if data == NIL
-					size = data[1].to_i
-					size = size * 1024 if data[2] == 'K'
-
-					type = STR_RAND
-					type = STR_SEQ if rs[0].upcase == 'S'
-
-					io = STR_READ
-					io = STR_WRITE if rw[0].upcase == 'W'
-
-					@options.specs << [size, type, io]
+					spec = __parse_spec(ss)
+					next if spec == NIL
+					@options.specs << spec
 				end
 			end
 
@@ -237,14 +321,12 @@ class IcfGen
 
 		specification = {}
 		@options.specs.each do |s|
-			next if s[0] == STR_IDLE
-			name = "#{__scalize(s[0])} #{s[1]} #{s[2]}"
-			p_read, p_rand = 100, 100
-			p_rand = 0 if s[1] == STR_SEQ
-			p_read = 0 if s[2] == STR_WRITE
-			conf = [s[0], 100, p_read, p_rand, 0, 1, 0, 0]
+			next if s['idle']
+			align = 0
+			align = s['size'] if s['align']
+			conf = [s['size'], 100, s['iorate'], s['randomness'], 0, 1, align, 0]
 			pattern = "#{conf.join(',')}"
-			specification[name] = pattern
+			specification[s['key']] = pattern
 		end
 
 		@ofile.printf "'ACCESS SPECIFICATIONS =========================================================\n"
@@ -283,10 +365,10 @@ class IcfGen
 			@ofile.printf "'End default target settings for worker\n"
 			@ofile.printf "'Assigned access specs\n"
 			@options.specs.each do |s|
-				if s[0] == STR_IDLE then
+				if s['idle'] then
 					@ofile.printf "\t#{STR_IDLE}\n"
 				else
-					@ofile.printf "\t#{__scalize(s[0])} #{s[1]} #{s[2]}\n"
+					@ofile.printf "\t#{s['key']}\n"
 				end
 			end
 			@ofile.printf "'End assigned access specs\n"
