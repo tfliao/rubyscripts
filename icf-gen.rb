@@ -5,7 +5,7 @@ require 'ostruct'
 class IcfGen
 	def initialize()
 		@basename = File.basename(__FILE__, ".rb")
-		@version  = '1.3.0'
+		@version  = '1.4.0'
 		@ofile = NIL
 		__parse_init
 	end
