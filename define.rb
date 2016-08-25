@@ -7,7 +7,7 @@ class Define
 
 	def initialize()
 		@basename = File.basename(__FILE__, ".rb")
-		@version  = '1.0.0'
+		@version  = '1.0.1'
 		__parse_init
 	end
 
@@ -81,15 +81,22 @@ class Define
 			@adds = []
 			@removes = []
 			@results = []
+			@add_cnt = 0
+			@rem_cnt = 0
+			@nor_cnt = 0
 		end
 
 		def put(line)
+			isEnd = false
 			case line[0]
 			when "+"
 				@adds << line[1..-1]
+				@add_cnt += 1
 			when "-"
 				@removes << line[1..-1]
+				@rem_cnt += 1
 			else
+				@nor_cnt += 1
 				if !@adds.empty? and !@removes.empty?
 					@diff_len = @diff_len + 3 + @removes.length
 					@results << "+#ifdef #{@define}"
@@ -103,7 +110,7 @@ class Define
 					@adds.each do |a| @results << "+#{a}" end
 					@results << "+#endif /* #{@define} */"
 				elsif !@removes.empty?
-					@diff_len = @diff_len + 2 + @removes.length 
+					@diff_len = @diff_len + 2 + @removes.length
 					@results << "+#if !define(#{@define})"
 					@removes.each do |r| @results << " #{r}" end
 					@results << "+#endif /* #{@define} */"
@@ -112,6 +119,7 @@ class Define
 				@adds = []
 				@removes = []
 			end
+			return @nor_cnt + @rem_cnt == @from_len && @nor_cnt + @add_cnt == @to_len
 		end
 		def dumps()
 			res = "@@ -%d,%d +%d,%d @@%s\n" % [@from_offset, @from_len, @to_offset, @to_len + @diff_len, @tag]
@@ -126,34 +134,21 @@ class Define
 
 	def __handlefile(file)
 		seg = NIL
-		in_seg = false
 		File.foreach(file) do |line|
-			if line.start_with?("diff") and in_seg
-				if seg != NIL
+			if line.start_with?("@@")
+				seg = Segment.new(line, 0, @options.define)
+				next
+			end
+
+			if seg != NIL
+				isEnd = seg.put(line)
+				if isEnd
 					print seg.dumps()
 					seg = NIL
 				end
-				in_seg = false
-			end
-
-			if line.start_with?("@@")
-				if seg != NIL
-					print seg.dumps()
-				end
-				seg = Segment.new(line, 0, @options.define)
-				in_seg = true
 				next
 			end
-
-			if !in_seg
-				puts line
-				next
-			else
-				seg.put(line)
-			end
-		end
-		if seg != NIL
-			print seg.dumps()
+			puts line
 		end
 	end
 end
