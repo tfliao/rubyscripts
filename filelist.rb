@@ -5,7 +5,7 @@ require 'ostruct'
 class FileList
 	def initialize()
 		@basename = File.basename(__FILE__, ".rb")
-		@version  = '1.3.1'
+		@version  = '1.4.0'
 		@files = NIL
 		__parse_init
 	end
@@ -21,6 +21,7 @@ class FileList
 		@options = OpenStruct.new
 		@options.single = false
 		@options.vim = false
+		@options.vim_ro = false
 		@options.binary = false
 		@options.key = ""
 		@options.basedirs = ["."]
@@ -51,6 +52,9 @@ class FileList
 			end
 			opts.on("-v", "--vim", "open all files by vim with tabs") do |v|
 				@options.vim = v
+			end
+			opts.on("-R", "--readonly", "(use with --vim, open files read only") do |v|
+				@options.vim_ro = v
 			end
 			opts.on("-b", "--[no-]binary", "show binary files") do |v|
 				@options.binary = v
@@ -99,7 +103,8 @@ class FileList
 
 	def __do_operation
 		if @options.vim then
-			exec "vim -p #{@files.join(' ')}"
+			vim_opt = "-R" if @options.vim_ro
+			exec "vim -p #{vim_opt} #{@files.join(' ')}"
 		end
 
 		if @options.single then
